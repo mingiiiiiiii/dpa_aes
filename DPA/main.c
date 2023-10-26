@@ -55,7 +55,7 @@ int main() {
 
     for (size_t guessByteIndex = 0; guessByteIndex < 16; guessByteIndex++) {
         // initialize
-        memset(&maxEpsilonCandid, 0, sizeof(EPSILON_CANDIDATE));
+        memset(maxEpsilonCandid, 0, sizeof(maxEpsilonCandid));
         finalRatio = 0;
 
         for (size_t guessKey = 0; guessKey < 256; guessKey++) {
