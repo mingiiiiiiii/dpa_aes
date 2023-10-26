@@ -1,13 +1,25 @@
 #include "util.h"
 
-uint8_t GetHammingWeight(uint8_t src) {
-    uint8_t hamming_weight = 0;     // 8-bit에 대한 hammingweight 최댓값 8
+const unsigned char m1 = 0x55; // binary: 01010101 
+const unsigned char m2 = 0x33; // binary: 00110011 
+const unsigned char m4 = 0x0f; // binary: 00001111 
 
-    for (size_t cnt_i = 0; cnt_i < 8; cnt_i++) {
-        hamming_weight += ((src >> cnt_i) & 0x01);  // 1인지 0인지 확인하기
-    }
+// uint8_t GetHammingWeight(uint8_t src) {
+//     uint8_t hamming_weight = 0;     // 8-bit에 대한 hammingweight 최댓값 8
 
-    return hamming_weight;
+//     for (size_t cnt_i = 0; cnt_i < 8; cnt_i++) {
+//         hamming_weight += ((src >> cnt_i) & 0x01);  // 1인지 0인지 확인하기
+//     }
+
+//     return hamming_weight;
+// }
+
+uint8_t GetHammingWeight(unsigned char x) 
+{
+   x = (x & m1) + ((x >> 1) & m1); // put count of each 2 bits into those 2 bits
+   x = (x & m2) + ((x >> 2) & m2); // put count of each 4 bits into those 4 bits
+   x = (x & m4) + ((x >> 4) & m4); // put count of each 8 bits into those 8 bits
+   return x;
 }
 
 void MakeHammingWeightTable(uint8_t state[], uint32_t table[]) {

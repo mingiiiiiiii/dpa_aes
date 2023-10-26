@@ -10,6 +10,62 @@
 #define TraceFileName   "simulatedPowerConsumption.txt"
 #define ResultFileName  "DPAresult.txt"
 
+struct Element {
+    double value;
+    uint32_t originalIndex;
+};
+
+void merge(struct Element arr[], int left, int mid, int right) {
+    int n1 = mid - left + 1;
+    int n2 = right - mid;
+    struct Element L[n1], R[n2];
+
+    // arr값 대입
+    for (int i = 0; i < n1; i++) {
+        L[i] = arr[left + i];
+    }
+    for (int i = 0; i < n2; i++) {
+        R[i] = arr[mid + 1 + i];
+    }
+
+    int i = 0, j = 0, k = left;
+    while (i < n1 && j < n2) {
+        if (L[i].value <= R[j].value) {
+            arr[k] = L[i];
+            i++;
+        } else {
+            arr[k] = R[j];
+            j++;
+        }
+        k++;
+    }
+
+    while (i < n1) {
+        arr[k] = L[i];
+        i++;
+        k++;
+    }
+
+    while (j < n2) {
+        arr[k] = R[j];
+        j++;
+        k++;
+    }
+}
+
+// Merge Sort 함수
+void mergeSort(struct Element arr[], int left, int right) {
+    if (left < right) {
+        int mid = left + (right - left) / 2;
+
+        mergeSort(arr, left, mid);
+        mergeSort(arr, mid + 1, right);
+
+        merge(arr, left, mid, right);
+    }
+}
+
+
 double GetAbsoluteValue(double src) {
     if (src < 0) {
         return src * (-1);
@@ -123,24 +179,29 @@ int main() {
     }
     //! pass
 
-    uint8_t pt_tmp = 0x00;    // for 평문 특정 바이트 값
+    uint8_t pt_tmp = 0x00;    // 평문 특정 바이트 값을 위한 임시변수
     uint32_t msbZeroCnt, msbOneCnt;
-    uint32_t msbZeroAcc[PointNum], msbOneAcc[PointNum];
-    double msbZeroAvg[PointNum], msbOneAvg[PointNum], epsilon[PointNum];
-    double maxEpsilonCandid[256][2];    // for Ratio
+    uint32_t msbZeroAcc[PointNum], msbOneAcc[PointNum];     // 해밍웨이트 누적 합을 저장하는 배열 (MSB에 따른 분류)
+    double msbZeroAvg[PointNum], msbOneAvg[PointNum], epsilon[PointNum];    // 포인트들의 해밍웨이트 평균 값 (MSB에 따른 분류), 평균들의 차를 저장하는 배열
+    double maxEpsilonCandid[256];   // guessKey 00~ff에서 각각의 epsilon에서의 최댓값을 저장하는 배열
     uint8_t finalGuessKey[16] = { 0x00 };
+    //! finalRatio는 테이블 필요 없을듯
     double finalRatio[16] = { 0x00 };
     int max_idx;
-    double tmptmp[256] = { 0x00 };
+    // double tmptmp[256] = { 0x00 };
 
+    //!test********************************
+    struct Element arr[256] = { {0,0} };
+    int n_size = 256;
+    //!************************************
 
     for (size_t guessByteIndex = 0; guessByteIndex < 16; guessByteIndex++) {
+        // initialize
         memset(maxEpsilonCandid, 0, sizeof(maxEpsilonCandid));
         max_idx = 0;
-        //! have to change
-        memset(tmptmp, 0, sizeof(tmptmp));
-        //!
+
         for (size_t guessKey = 0; guessKey < 256; guessKey++) {
+            // initialize
             msbZeroCnt = 0, msbOneCnt = 0;
             memset(msbZeroAcc, 0, sizeof(msbZeroAcc));
             memset(msbOneAcc, 0, sizeof(msbOneAcc));
@@ -173,35 +234,34 @@ int main() {
                 msbOneAvg[point_cnt] = (double)msbOneAcc[point_cnt] / msbOneCnt;
                 epsilon[point_cnt] = GetAbsoluteValue(msbOneAvg[point_cnt] - msbZeroAvg[point_cnt]);
             }
-            
-            // for (int k = 0; k < 64; k++) {
-            //     printf("[%d]    %lf\n", k, epsilon[k]);
-            // }
-            // printf("\n");
-            maxEpsilonCandid[guessKey][0] = GetMaxValue(epsilon, 64);     // 최댓값
-            maxEpsilonCandid[guessKey][1] = GetSecondValue(epsilon, 64);     // 두번째로 큰 값
-            // printf("%f\t %f\n", maxEpsilonCandid[guessKey][0], maxEpsilonCandid[guessKey][1]);
+            //! test
+            arr[guessKey].originalIndex = guessKey;
+            arr[guessKey].value = GetMaxValue(epsilon, 64);
+            //!
+
+            maxEpsilonCandid[guessKey] = GetMaxValue(epsilon, 64);     // 최댓값
         }
+
+        //! test
+        mergeSort(arr, 0, 256 - 1);
+        printf("정렬된 배열:\n");
+        for (int i = 0; i < 256; i++) {
+        printf("값: %lf, 원래 인덱스: %d\n", arr[i].value, arr[i].originalIndex);
+        }
+
         //todo 256개의 epsilon 최댓값으로 guesskey 확정하기
-        for (int cnt_k = 0; cnt_k < 256; cnt_k++) {
-            tmptmp[cnt_k] = maxEpsilonCandid[cnt_k][0];
-            // for (int cnt_e = 0; cnt_e < 2; cnt_e++) {
-            //     printf("[%02X]    %f\n",cnt_k, maxEpsilonCandid[cnt_k][cnt_e]);
-            // }
-            // printf("\n");
-        }
-        max_idx = GetMaxValueIndex(tmptmp, 256);
-        double ttt = GetSecondValue(tmptmp, 256);
+        max_idx = GetMaxValueIndex(maxEpsilonCandid, 256);
+        double ttt = GetSecondValue(maxEpsilonCandid, 256);
         finalGuessKey[guessByteIndex] = max_idx;
-        // printf("%f\t %f", maxEpsilonCandid[max_idx][0], maxEpsilonCandid[max_idx][1]);
-        finalRatio[guessByteIndex] = maxEpsilonCandid[max_idx][0] / ttt;
+        finalRatio[guessByteIndex] = maxEpsilonCandid[max_idx] / ttt;
         
         printf("[%02d byte]\t %02X\t %lf\t %lf\n",
             guessByteIndex, finalGuessKey[guessByteIndex],
-                maxEpsilonCandid[max_idx][0], finalRatio[guessByteIndex]);
+            maxEpsilonCandid[max_idx], finalRatio[guessByteIndex]);
+        fprintf(fp_rst, "[%02d byte]\t %02X\t %lf\t %lf\n",
+            guessByteIndex, finalGuessKey[guessByteIndex],
+                maxEpsilonCandid[max_idx], finalRatio[guessByteIndex]);
     }
-
-    
 
     fclose(fp_pt);
     fclose(fp_trace);
