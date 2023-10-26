@@ -54,7 +54,7 @@ uint8_t Rcon[10] = { 0x01, 0x02, 0x04, 0x08, 0x10, 0x20, 0x40, 0x80, 0x1B, 0x36 
 #define mul_0e(x) mul_08((x)) ^ mul_04((x)) ^ mul_02((x))
 
 //라운드 키의 state를 각 바이트별로 xor    u32 rk[round][4] = roundkey // 16바이트
-void AddRoundKey(uint8_t state[], uint8_t roundkey[]) {
+void addRoundKey(uint8_t state[], uint8_t roundkey[]) {
 	state[0] ^= roundkey[0];
 	state[1] ^= roundkey[1];
 	state[2] ^= roundkey[2];
@@ -75,7 +75,7 @@ void AddRoundKey(uint8_t state[], uint8_t roundkey[]) {
 }
 
 // 각 바이트를 S-box를 참조하여 치환.
-void SubBytes(uint8_t state[]) {
+void subBytes(uint8_t state[]) {
 	state[0] = Sbox[state[0]];
 	state[1] = Sbox[state[1]];
 	state[2] = Sbox[state[2]];
@@ -94,7 +94,7 @@ void SubBytes(uint8_t state[]) {
 	state[15] = Sbox[state[15]];
 }
 
-void InvSubBytes(uint8_t state[]) {
+void invSubBytes(uint8_t state[]) {
 	state[0] = InvSbox[state[0]];
 	state[1] = InvSbox[state[1]];
 	state[2] = InvSbox[state[2]];
@@ -113,7 +113,7 @@ void InvSubBytes(uint8_t state[]) {
 	state[15] = InvSbox[state[15]];
 }
 
-void ShiftRows(uint8_t state[]) {
+void shiftRows(uint8_t state[]) {
 	uint8_t tmp1, tmp2;
 	tmp1 = state[1];
 	state[1] = state[5];  state[5] = state[9];
@@ -146,7 +146,7 @@ void InvShiftRows(uint8_t state[]) {
 }
 
 //위에서 mixcolumn계산을 위해 구해논 값으로 mixcolumn 연산을 합니다.
-void MixColumns(uint8_t state[]) {
+void mixColumns(uint8_t state[]) {
 	/*for (uint8_t i = 0; i < 4; i++) {
 		uint8_t tmp1 = state[i * 4];   uint8_t b = state[i * 4 + 1];
 		uint8_t tmp3 = state[i * 4 + 2]; uint8_t d = state[i * 4 + 3];
@@ -205,7 +205,7 @@ void MixColumns(uint8_t state[]) {
 
 }
 
-void InvMixColumns(uint8_t state[]) {
+void invMixColumns(uint8_t state[]) {
 	/*for (int i = 0; i < 4; i++) {
 		uint8_t tmp1 = arr[i * 4];   uint8_t b = arr[i * 4 + 1];
 		uint8_t tmp3 = arr[i * 4 + 2]; uint8_t d = arr[i * 4 + 3];
@@ -264,7 +264,7 @@ void InvMixColumns(uint8_t state[]) {
 
 }
 
-void KeySchedule(uint8_t key[], uint8_t rk[11][16]) { //[0,1,2,,16] //[0,1,2,3]
+void keySchedule(uint8_t key[], uint8_t rk[11][16]) { //[0,1,2,,16] //[0,1,2,3]
 	
 	for (int i = 0; i < 16; i++) {
 		rk[0][i] = key[i];
@@ -303,162 +303,3 @@ void KeySchedule(uint8_t key[], uint8_t rk[11][16]) { //[0,1,2,,16] //[0,1,2,3]
 		rk[i + 1][15] = rk[i][15] ^ rk[i + 1][11];	
 	}
 }
-
-void Print_Array(const uint8_t arr[], char* str) {
-    printf("%s\n", str);
-    for (int cnt_i = 0; cnt_i < 16; cnt_i++) {
-        printf("%02X ", arr[cnt_i]);
-    }
-    printf("\n");
-}
-
-void Encryption(uint8_t pt[], uint8_t rk[][16], uint8_t ct[], uint8_t key[]) {
-    uint8_t state[16] = { 0x00 };
-    
-    for (int i = 0; i < 16; i++) {
-		state[i] = pt[i];
-	}
-	
-	KeySchedule(key, rk);
-    AddRoundKey(state, rk[0]);
-    
-    for (int round_cnt = 1; round_cnt < 10; round_cnt++) {
-		SubBytes(state);
-		ShiftRows(state);
-		MixColumns(state);
-		AddRoundKey(state, rk[round_cnt]);
-	}
-	SubBytes(state);
-	ShiftRows(state);
-	AddRoundKey(state, rk[10]);
-	for (int i = 0; i < 16; i++) {
-		ct[i] = state[i];
-	}
-}
-
-void Encryption_PrintVer(uint8_t pt[], uint8_t rk[][16], uint8_t ct[], uint8_t key[]) {
-    uint8_t state[16] = { 0x00 };
-    
-    for (int i = 0; i < 16; i++) {
-		state[i] = pt[i];
-	}
-    Print_Array(state, "PT");
-	KeySchedule(key, rk);
-    AddRoundKey(state, rk[0]);
-
-    for (int round_cnt = 1; round_cnt < 10; round_cnt++) {
-        printf("%d", round_cnt);
-        Print_Array(state, " Round state");
-
-        SubBytes(state);
-        printf("%d", round_cnt);
-        Print_Array(state, " Round state After SubBytes");
-
-        ShiftRows(state);
-        printf("%d", round_cnt);
-        Print_Array(state, " Round state After ShiftRows");
-
-        MixColumns(state);
-        printf("%d", round_cnt);
-        Print_Array(state, " Round state After MixColumns");
-
-        AddRoundKey(state, rk[round_cnt]);
-    }
-    Print_Array(state, "10 Round state");
-
-    SubBytes(state);
-    Print_Array(state, "10 Round state After SubBytes");
-
-    ShiftRows(state);
-    Print_Array(state, "10 Round state After ShiftRows");
-
-    AddRoundKey(state, rk[10]);
-    Print_Array(state, "CT");
-    
-    for (int i = 0; i < 16; i++) {
-		ct[i] = state[i];
-	}
-}
-
-void Decryption(uint8_t ct[], uint8_t rk[][16], uint8_t pt[]) {
-	uint8_t state[16];
-	for (int i = 0; i < 16; i++) {
-		state[i] = ct[i];
-	}
-
-	AddRoundKey(state, rk[10]);
-	InvShiftRows(state);
-	InvSubBytes(state);
-
-	for (int i = 9; i >= 1; i--) {
-		AddRoundKey(state, rk[i]);
-		InvMixColumns(state);
-		InvShiftRows(state);
-		InvSubBytes(state);
-	}
-
-	AddRoundKey(state, rk[0]);
-
-	for (int i = 0; i < 16; i++) {
-	 pt[i] = state[i];
-	}
-}
-
-// int File_encrypt() {
-// 	uint8_t key[16] = { 0x2b, 0x7e, 0x15, 0x16, 0x28, 0xae, 0xd2, 0xa6, 0xab, 0xf7, 0x15, 0x88, 0x09, 0xcf, 0x4f, 0x3c };
-// 	uint8_t rk[11][16] = { 0x00, };
-// 	uint8_t pt[16] = { 0x00 };
-// 	uint8_t ct[16] = { 0x00 };
-// 	int encrypt_cnt = 0;
-// 	int byte_buffer = 0;
-// 	int blockindex = 0;
-// 	int byteindex = 0;
-
-// 	FILE *inputFile = NULL;
-
-
-// 	fopen_s(&inputFile,  pttext.txt", "rt");
-
-// 	if (inputFile == NULL) {
-// 		printf("inputFile error!");
-// 		return 1;
-// 	}
-
-// 	FILE *outputFile;
-// 	fopen_s(&outputFile, "encrypted.txt", "wt");
-
-// 	if (outputFile == NULL) {
-// 		printf("outputFile error!");
-// 		return 1;
-// 	}
-
-// 	fscanf_s(inputFile, "%d", &encrypt_cnt);
-
-
-// 	fprintf(outputFile, "%d\n", encrypt_cnt);
-
-
-// 	for (blockindex = 0; blockindex < encrypt_cnt; blockindex++) {
-// 		for (byteindex = 0; byteindex < 16; byteindex++) {
-// 			fscanf_s(inputFile, "%02x", &byte_buffer);
-// 			pt[byteindex] = byte_buffer;
-// 		}
-
-// 		Encryption(pt, rk, ct, key);
-
-// 		for (byteindex = 0; byteindex < 16; byteindex++) {
-// 			fprintf(outputFile, "%02x ", ct[byteindex]);
-// 		}
-// 		fprintf(outputFile, "\n", ct[byteindex]);
-// 	}
-
-// 	fclose(inputFile);
-// 	fclose(outputFile);
-
-// 	printf(" AES Encrypt Success! ");
-	
-// 	return 0;
-// }
-
-
-

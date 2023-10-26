@@ -1,80 +1,112 @@
 #include "util.h"
 
-const unsigned char m1 = 0x55; // binary: 01010101 
-const unsigned char m2 = 0x33; // binary: 00110011 
-const unsigned char m4 = 0x0f; // binary: 00001111 
-
-// uint8_t GetHammingWeight(uint8_t src) {
-//     uint8_t hamming_weight = 0;     // 8-bit에 대한 hammingweight 최댓값 8
-
-//     for (size_t cnt_i = 0; cnt_i < 8; cnt_i++) {
-//         hamming_weight += ((src >> cnt_i) & 0x01);  // 1인지 0인지 확인하기
-//     }
-
-//     return hamming_weight;
-// }
-
-uint8_t GetHammingWeight(unsigned char x) 
-{
-   x = (x & m1) + ((x >> 1) & m1); // put count of each 2 bits into those 2 bits
-   x = (x & m2) + ((x >> 2) & m2); // put count of each 4 bits into those 4 bits
-   x = (x & m4) + ((x >> 4) & m4); // put count of each 8 bits into those 8 bits
-   return x;
-}
-
-void MakeHammingWeightTable(uint8_t state[], uint32_t table[]) {
-    for (size_t cnt_i = 0; cnt_i < 16; cnt_i++) {
-        table[cnt_i] = GetHammingWeight(state[cnt_i]);
+double getAbsoluteValue(double src) {
+    if (src < 0) {
+        return src * (-1);
     }
+    return src;
 }
 
+// merge function using struct
+void mergeStructVer(EPSILON_CANDIDATE arr[], uint32_t left, uint32_t mid, uint32_t right) {
+    uint32_t n1 = mid - left + 1;
+    uint32_t n2 = right - mid;
+    EPSILON_CANDIDATE L[n1], R[n2];
 
+    // copy data to temp array
+    for (size_t cnt_i = 0; cnt_i < n1; cnt_i++) {
+        L[cnt_i] = arr[left + cnt_i];
+    }
+    for (size_t cnt_i = 0; cnt_i < n2; cnt_i++) {
+        R[cnt_i] = arr[mid + 1 + cnt_i];
+    }
 
-// int popcount_1(unsigned char in) {
-
-// unsigned char m1  = 0x55;
-// unsigned char m2  = 0x33;
-// unsigned char m4  = 0x0f;
-// unsigned char B,C = 0;
-// unsigned char x = in;
-
-// x = (x & (x << 1) & (m1 << 1)) | (m1 & (x ^ (x >> 1)));
-
-// B = x & m2;
-// C = (x >>  2) & m2;
-// x = B ^ C ^ ((B & C) << 1);
-
-// B = (x & m4 ) ^ ((x >>  4) & m4);
-// C = (x & ((x >>  4) & m4)) << 1;
-// x = B ^ C ^ ((B & C) << 1);
-// return x;
-// }
-
-void swap(double* a, double* b) {
-    double temp = *a;
-    *a = *b;
-    *b = temp;
-}
-
-int partition(double arr[], int low, int high) {
-    double pivot = arr[high];
-    int i = (low - 1);
-
-    for (int j = low; j <= high - 1; j++) {
-        if (arr[j] > pivot) { // 부등호 방향 변경
+    uint32_t i = 0, j = 0, k = left;
+    while (i < n1 && j < n2) {
+        if (L[i].value <= R[j].value) {
+            arr[k] = L[i];
             i++;
-            swap(&arr[i], &arr[j]);
         }
+        else {
+            arr[k] = R[j];
+            j++;
+        }
+        k++;
     }
-    swap(&arr[i + 1], &arr[high]);
-    return (i + 1);
+
+    while (i < n1) {
+        arr[k] = L[i];
+        i++;
+        k++;
+    }
+
+    while (j < n2) {
+        arr[k] = R[j];
+        j++;
+        k++;
+    }
 }
 
-void quickSort(double arr[], int low, int high) {
-    if (low < high) {
-        int pi = partition(arr, low, high);
+// mergeSort function using struct
+void mergeSortStructVer(EPSILON_CANDIDATE arr[], uint32_t left, uint32_t right) {
+    if (left < right) {
+        uint32_t mid = left + (right - left) / 2;
 
-        quickSort(arr, low, pi - 1);
-        quickSort(arr, pi + 1, high);
+        mergeSortStructVer(arr, left, mid);
+        mergeSortStructVer(arr, mid + 1, right);
+
+        mergeStructVer(arr, left, mid, right);
+    }
+}
+
+// merge function using array
+void mergeArrayVer(double arr[], uint32_t left, uint32_t mid, uint32_t right) {
+    uint32_t n1 = mid - left + 1;
+    uint32_t n2 = right - mid;
+    double L[n1], R[n2];
+
+    // copy data to temp array
+    for (size_t cnt_i = 0; cnt_i < n1; cnt_i++) {
+        L[cnt_i] = arr[left + cnt_i];
+    }
+    for (size_t cnt_i = 0; cnt_i < n2; cnt_i++) {
+        R[cnt_i] = arr[mid + 1 + cnt_i];
+    }
+
+    uint32_t i = 0, j = 0, k = left;
+    while (i < n1 && j < n2) {
+        if (L[i] <= R[j]) {
+            arr[k] = L[i];
+            i++;
+        }
+        else {
+            arr[k] = R[j];
+            j++;
+        }
+        k++;
+    }
+
+    while (i < n1) {
+        arr[k] = L[i];
+        i++;
+        k++;
+    }
+
+    while (j < n2) {
+        arr[k] = R[j];
+        j++;
+        k++;
+    }
+}
+
+// mergeSort function using array
+void mergeSortArrayVer(double arr[], uint32_t left, uint32_t right) {
+    if (left < right) {
+        uint32_t mid = left + (right - left) / 2;
+
+        mergeSortArrayVer(arr, left, mid);
+        mergeSortArrayVer(arr, mid + 1, right);
+
+        mergeArrayVer(arr, left, mid, right);
     }
 }

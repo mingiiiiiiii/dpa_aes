@@ -1,5 +1,9 @@
+#ifndef UTIL_H
+
 #include "AES.h"
 
-uint8_t GetHammingWeight(uint8_t src);
-void MakeHammingWeightTable(uint8_t state[], uint32_t table[]);
-double GetAbsoluteValue(double src);
+// uint32_t efficientHammingWeig(unsigned char src)
+
+void getHammingWeig(uint8_t state[], uint32_t table[]);
+
+#endif

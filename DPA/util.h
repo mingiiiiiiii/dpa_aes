@@ -1,11 +1,19 @@
+#ifndef UTIL_H
+
 #include "AES.h"
 #include <stdlib.h>
 
-uint8_t GetHammingWeight(uint8_t src);
-void MakeHammingWeightTable(uint8_t state[], uint32_t table[]);
+typedef struct epsilon_candidate {
+    double value;
+    uint32_t originalIndex;
+} EPSILON_CANDIDATE;
 
-void swap(double* a, double* b);
+double getAbsoluteValue(double src);
 
-int partition(double arr[], int low, int high);
+void mergeStructVer(EPSILON_CANDIDATE arr[], uint32_t left, uint32_t mid, uint32_t right);
+void mergeSortStructVer(EPSILON_CANDIDATE arr[], uint32_t left, uint32_t right);
 
-void quickSort(double arr[], int low, int high);
+void mergeArrayVer(double arr[], uint32_t left, uint32_t mid, uint32_t right);
+void mergeSortArrayVer(double arr[], uint32_t left, uint32_t right);
+
+#endif
