@@ -8,10 +8,10 @@ double getAbsoluteValue(double src) {
 }
 
 // merge function using struct
-void mergeStructVer(EPSILON_CANDIDATE arr[], uint32_t left, uint32_t mid, uint32_t right) {
+void mergeStructVer(DIFFERENCE_CANDIDATE arr[], uint32_t left, uint32_t mid, uint32_t right) {
     uint32_t n1 = mid - left + 1;
     uint32_t n2 = right - mid;
-    EPSILON_CANDIDATE L[n1], R[n2];
+    DIFFERENCE_CANDIDATE L[n1], R[n2];
 
     // copy data to temp array
     for (size_t cnt_i = 0; cnt_i < n1; cnt_i++) {
@@ -48,7 +48,7 @@ void mergeStructVer(EPSILON_CANDIDATE arr[], uint32_t left, uint32_t mid, uint32
 }
 
 // mergeSort function using struct
-void mergeSortStructVer(EPSILON_CANDIDATE arr[], uint32_t left, uint32_t right) {
+void mergeSortStructVer(DIFFERENCE_CANDIDATE arr[], uint32_t left, uint32_t right) {
     if (left < right) {
         uint32_t mid = left + (right - left) / 2;
 

@@ -47,25 +47,25 @@ int main() {
 
     uint8_t pt_tmp = 0x00;    // 평문 특정 바이트 값을 위한 임시변수
     uint32_t msbZeroCnt, msbOneCnt;
-    uint32_t msbZeroAcc[PointNum], msbOneAcc[PointNum];     // 해밍웨이트 누적 합을 저장하는 배열 (MSB에 따른 분류)
-    double msbZeroAvg[PointNum], msbOneAvg[PointNum], epsilon[PointNum];    // 포인트들의 해밍웨이트 평균 값 (MSB에 따른 분류), 평균들의 차를 저장하는 배열
+    uint32_t msbZeroSum[PointNum], msbOneSum[PointNum];     // 해밍웨이트 누적 합을 저장하는 배열 (MSB에 따른 분류)
+    double msbZeroAvg[PointNum], msbOneAvg[PointNum], difference[PointNum];    // 포인트들의 해밍웨이트 평균 값 (MSB에 따른 분류), 평균들의 차를 저장하는 배열
     double finalRatio = 0;
 
-    EPSILON_CANDIDATE maxEpsilonCandid[256] = { {0,0} };    // 00~ff(guessKey)에서 각각의 epsilon에서의 최댓값과 그때의 guessKey를 저장하는 구조체 배열
+    DIFFERENCE_CANDIDATE maxDifferenceCandid[256] = { {0,0} };    // 00~ff(guessKey)에서 각각의 difference에서의 최댓값과 그때의 guessKey를 저장하는 구조체 배열
 
     for (size_t guessByteIndex = 0; guessByteIndex < 16; guessByteIndex++) {
         // initialize
-        memset(maxEpsilonCandid, 0, sizeof(maxEpsilonCandid));
+        memset(maxDifferenceCandid, 0, sizeof(maxDifferenceCandid));
         finalRatio = 0;
 
         for (size_t guessKey = 0; guessKey < 256; guessKey++) {
             // initialize
             msbZeroCnt = 0, msbOneCnt = 0;
-            memset(msbZeroAcc, 0, sizeof(msbZeroAcc));
-            memset(msbOneAcc, 0, sizeof(msbOneAcc));
+            memset(msbZeroSum, 0, sizeof(msbZeroSum));
+            memset(msbOneSum, 0, sizeof(msbOneSum));
             memset(msbZeroAvg, 0, sizeof(msbZeroAvg));
             memset(msbOneAvg, 0, sizeof(msbOneAvg));
-            memset(epsilon, 0, sizeof(epsilon));
+            memset(difference, 0, sizeof(difference));
 
             for (size_t trace_cnt = 0; trace_cnt < TraceNum; trace_cnt++) {
                 //todo 중간 값 만들고 전력소비 값과 관계 선택
@@ -74,13 +74,13 @@ int main() {
 
                 if (((pt_tmp >> 7) & 0x01) == 0) {   // MSB == 0
                     for (size_t point_cnt = 0; point_cnt < PointNum; point_cnt++) {
-                        msbZeroAcc[point_cnt] += ptHammingWeigTable[trace_cnt][point_cnt];
+                        msbZeroSum[point_cnt] += ptHammingWeigTable[trace_cnt][point_cnt];
                     }
                     msbZeroCnt++;
                 }
                 else if (((pt_tmp >> 7) & 0x01) == 1) {  // MSB == 1
                     for (size_t point_cnt = 0; point_cnt < PointNum; point_cnt++) {
-                        msbOneAcc[point_cnt] += ptHammingWeigTable[trace_cnt][point_cnt];
+                        msbOneSum[point_cnt] += ptHammingWeigTable[trace_cnt][point_cnt];
                     }
                     msbOneCnt++;
                 }
@@ -88,23 +88,23 @@ int main() {
             
             //todo 포인트 별 평균 구하고 & 평균들의 차를 계산하고 (절댓값) & 최댓값 뽑기
             for (size_t point_cnt = 0; point_cnt < PointNum; point_cnt++) {
-                msbZeroAvg[point_cnt] = (double)msbZeroAcc[point_cnt] / msbZeroCnt;
-                msbOneAvg[point_cnt] = (double)msbOneAcc[point_cnt] / msbOneCnt;
-                epsilon[point_cnt] = getAbsoluteValue(msbOneAvg[point_cnt] - msbZeroAvg[point_cnt]);
+                msbZeroAvg[point_cnt] = (double)msbZeroSum[point_cnt] / msbZeroCnt;
+                msbOneAvg[point_cnt] = (double)msbOneSum[point_cnt] / msbOneCnt;
+                difference[point_cnt] = getAbsoluteValue(msbOneAvg[point_cnt] - msbZeroAvg[point_cnt]);
             }
             
-            mergeSortArrayVer(epsilon, 0, 64 - 1);  // sort epsilon 
-            maxEpsilonCandid[guessKey].originalIndex = guessKey; // struct --> [value, index(guessKey)]
-            maxEpsilonCandid[guessKey].value = epsilon[64 - 1];  // 최댓값 대입 (포인트 64개 중 최댓값을 현재 loop의 guesskey의 대푯값으로 생각하기)
+            mergeSortArrayVer(difference, 0, 64 - 1);  // sort difference 
+            maxDifferenceCandid[guessKey].originalIndex = guessKey; // struct --> [value, index(guessKey)]
+            maxDifferenceCandid[guessKey].value = difference[64 - 1];  // 최댓값 대입 (포인트 64개 중 최댓값을 현재 loop의 guesskey의 대푯값으로 생각하기)
         }
 
-        //todo 256개의 epsilon 최댓값으로 guesskey 확정하기
-        mergeSortStructVer(maxEpsilonCandid, 0, KeyCandidateNum - 1);    // 대푯값이 모인 배열에서 value기준으로 정렬, struct --> [value, index(key)]
-        finalRatio = maxEpsilonCandid[KeyCandidateNum - 1].value / maxEpsilonCandid[KeyCandidateNum - 2].value;   // 최댓값 / 두번째 최댓값으로 Ratio 구하기
+        //todo 256개의 difference 최댓값으로 guesskey 확정하기
+        mergeSortStructVer(maxDifferenceCandid, 0, KeyCandidateNum - 1);    // 대푯값이 모인 배열에서 value기준으로 정렬, struct --> [value, index(key)]
+        finalRatio = maxDifferenceCandid[KeyCandidateNum - 1].value / maxDifferenceCandid[KeyCandidateNum - 2].value;   // 최댓값 / 두번째 최댓값으로 Ratio 구하기
 
         fprintf(fp_rst, "[%02d byte]\t %02X\t %lf\t %lf\n",
-            guessByteIndex, maxEpsilonCandid[KeyCandidateNum - 1].originalIndex,
-                maxEpsilonCandid[KeyCandidateNum - 1].value, finalRatio);
+            guessByteIndex, maxDifferenceCandid[KeyCandidateNum - 1].originalIndex,
+                maxDifferenceCandid[KeyCandidateNum - 1].value, finalRatio);
     }
 
     fclose(fp_pt);

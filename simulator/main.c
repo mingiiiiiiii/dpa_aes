@@ -48,12 +48,12 @@ int main() {
             fscanf(fp_pt, "%2hhx", &state[cnt_i]);
         }
 
-//todo AES Round 1
-addRoundKey(state, roundKey[0]);
-getHammingWeig(state, hammingWeig);
-for (size_t cnt_i = 0; cnt_i < 16; cnt_i++) {
-    fprintf(fp_trace, "%d ", hammingWeig[cnt_i]);
-}
+        //todo AES Round 1
+        addRoundKey(state, roundKey[0]);
+        getHammingWeig(state, hammingWeig);
+        for (size_t cnt_i = 0; cnt_i < 16; cnt_i++) {
+            fprintf(fp_trace, "%d ", hammingWeig[cnt_i]);
+        }
 
         subBytes(state);
         getHammingWeig(state, hammingWeig);
