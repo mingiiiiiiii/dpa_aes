@@ -1,4 +1,4 @@
-# Assignment 2 : DPA with real data
+# Assignment 2: DPA with real data
 
 ## Differential Power Analysis (DPA) Attack on AES-128 S-Box
 
