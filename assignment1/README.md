@@ -1,3 +1,5 @@
+# Assignment 1: DPA Implementation
+
 ## Differential Power Analysis (DPA) Attack on AES-128 S-Box
 
 This guide explains how to perform a Differential Power Analysis (DPA) attack on the AES-128 S-Box. The attack involves capturing power consumption data during the execution of the AES algorithm (via the Hamming Weight Power Model attack) and analyzing it to recover the secret key. The attack consists of two main steps: power consumption simulator and DPA.
