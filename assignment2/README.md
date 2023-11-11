@@ -40,7 +40,7 @@ The "CW_Lite_powerConsumption.trace" file is a binary file and comprises the fol
    ```shell
    cp realPowerConsumption.txt DPA/
    ```   
-You can save the points of each trace from "realPowerConsumption.txt" into individual files named "traceX.txt." Run "drawtrace.py" to visualize the graph:
+4. You can save the points of each trace from "realPowerConsumption.txt" into individual files named "traceX.txt." Run "drawtrace.py" to visualize the graph:
    ```shell
    python drawtrace.py
    ```
