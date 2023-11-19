@@ -1,0 +1,2 @@
+*.trace filter=lfs diff=lfs merge=lfs -text
+realPowerConsumption.txt filter=lfs diff=lfs merge=lfs -text
