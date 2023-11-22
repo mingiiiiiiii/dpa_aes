@@ -78,9 +78,8 @@ void test1() {
     uint8_t sbox_tmp = 0x00;
 
     COEF_CANDIDATE maxCoefCandid[KeyCandidateNum] = { {0,0} };    // 00~ff(guessKey)에서 각각의 Coef의 최댓값과 그때의 guessKey를 저장하는 구조체 배열
-    int printVer = 0;
 
-    for (size_t guessByteIndex = 0; guessByteIndex < 16; guessByteIndex++) {
+    for (size_t guessByteIndex = 0; guessByteIndex < 1; guessByteIndex++) {
         // initialize
         memset(ptHammingWeigTable, 0, sizeof(ptHammingWeigTable));
         memset(powerConsumptionPoint, 0, sizeof(powerConsumptionPoint));
@@ -104,7 +103,7 @@ void test1() {
                     powerConsumptionPoint[trace_cnt] = powerConsumptionValue[trace_cnt][point_cnt];
                 }
 
-                coef[point_cnt] = pearsonCorrelationCoef(ptHammingWeigTable, powerConsumptionPoint, TraceNum, printVer);  // 상관계수 구하기
+                coef[point_cnt] = pearsonCorrelationCoef(ptHammingWeigTable, powerConsumptionPoint, TraceNum);  // 상관계수 구하기
                 // printf("%lf\n", coef[point_cnt]);
             }
 
@@ -222,7 +221,7 @@ void test2() {
                     powerConsumptionPoint[trace_cnt] = powerConsumptionValue[trace_cnt][point_cnt];
                 }
 
-                coef[point_cnt - StartPoint] = pearsonCorrelationCoef(ptHammingWeigTable, powerConsumptionPoint, TraceNum, 1);  // 상관계수 구하기
+                coef[point_cnt - StartPoint] = pearsonCorrelationCoef(ptHammingWeigTable, powerConsumptionPoint, TraceNum);  // 상관계수 구하기
             }
 
             mergeSortArrayVer(coef, 0, (EndPoint - StartPoint + 1) - 1);

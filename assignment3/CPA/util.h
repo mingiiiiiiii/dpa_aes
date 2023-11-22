@@ -22,6 +22,6 @@ void mergeSortStructVer(COEF_CANDIDATE arr[], uint32_t left, uint32_t right);
 void mergeArrayVer(double arr[], uint32_t left, uint32_t mid, uint32_t right);
 void mergeSortArrayVer(double arr[], uint32_t left, uint32_t right);
 
-double pearsonCorrelationCoef(double *x, double *y, uint32_t n, int print);
+double pearsonCorrelationCoef(double *x, double *y, uint32_t n);
 
 #endif
