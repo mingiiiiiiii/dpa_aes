@@ -1,7 +1,7 @@
 #include "util.h"
 
 // Hamming weight table for 00~FF
-const double hammingWeigTable[256] = {
+const uint32_t hammingWeigTable[256] = {
 	0, 1, 1, 2, 1, 2, 2, 3, 1, 2, 2, 3, 2, 3, 3, 4,
 	1, 2, 2, 3, 2, 3, 3, 4, 2, 3, 3, 4, 3, 4, 4, 5,
 	1, 2, 2, 3, 2, 3, 3, 4, 2, 3, 3, 4, 3, 4, 4, 5,
@@ -20,7 +20,6 @@ const double hammingWeigTable[256] = {
 	4, 5, 5, 6, 5, 6, 6, 7, 5, 6, 6, 7, 6, 7, 7, 8,
 };
 
-
 // get hamming weight from table
 void getHammingWeig(uint8_t state[], uint32_t table[]) {
     for (size_t cnt_i = 0; cnt_i < 16; cnt_i++) {
@@ -36,10 +35,10 @@ double getAbsoluteValue(double src) {
 }
 
 // merge function using struct
-void mergeStructVer(COEF_CANDIDATE arr[], uint32_t left, uint32_t mid, uint32_t right) {
+void mergeStructVer(PEARSON_CORR_CANDIDATE arr[], uint32_t left, uint32_t mid, uint32_t right) {
     uint32_t n1 = mid - left + 1;
     uint32_t n2 = right - mid;
-    COEF_CANDIDATE L[n1], R[n2];
+    PEARSON_CORR_CANDIDATE L[n1], R[n2];
 
     // copy data to temp array
     for (size_t cnt_i = 0; cnt_i < n1; cnt_i++) {
@@ -76,7 +75,7 @@ void mergeStructVer(COEF_CANDIDATE arr[], uint32_t left, uint32_t mid, uint32_t 
 }
 
 // mergeSort function using struct
-void mergeSortStructVer(COEF_CANDIDATE arr[], uint32_t left, uint32_t right) {
+void mergeSortStructVer(PEARSON_CORR_CANDIDATE arr[], uint32_t left, uint32_t right) {
     if (left < right) {
         uint32_t mid = left + (right - left) / 2;
 
@@ -139,10 +138,9 @@ void mergeSortArrayVer(double arr[], uint32_t left, uint32_t right) {
     }
 }
 
-
-double pearsonCorrelationCoef(double *x, double *y, uint32_t n) {
-    double xSum = 0;
-    double xSqrSum = 0;
+double calcPearsonCorrelationCoefficient(uint32_t *x, double *y, uint32_t n) {
+    uint32_t xSum = 0;
+    uint32_t xSqrSum = 0;
     double ySum = 0;
     double ySqrSum = 0;
     double xySum = 0;
@@ -164,11 +162,8 @@ double pearsonCorrelationCoef(double *x, double *y, uint32_t n) {
     covariance = ((double)n * xySum) - (xSum * ySum);
     xVar = (n * xSqrSum) - (xSum * xSum);
     yVar = (n * ySqrSum) - (ySum * ySum);
-    // xVar = (xSum * xSum) - ((double)n * xSqrSum);
-    // yVar = (ySum * ySum) - ((double)n * ySqrSum);
 
-    // printf("covariance = %lf, xVar = %lf, yVar = %lf\n", covariance, xVar, yVar);
-
+    // 분모가 0일때의 예외처리
     if (yVar == 0 || xVar == 0) {
         coef = 0;
     }
@@ -179,62 +174,53 @@ double pearsonCorrelationCoef(double *x, double *y, uint32_t n) {
     return coef;
 }
 
-// double pearsonCorrelationCoef(double *x, double *y, uint32_t n) {
-//     double xSum = 0;
-//     double xAvg = 0;
-//     double ySum = 0;
-//     double yAvg = 0;
-//     double *xDev = (double*)calloc(n, sizeof(double));
-//     double *yDev = (double*)calloc(n, sizeof(double));
+/*
+double calcPearsonCorrelationCoefficient(double *x, double *y, uint32_t n) {
+    double xSum = 0;
+    double xAvg = 0;
+    double ySum = 0;
+    double yAvg = 0;
+    double *xDev = (double*)calloc(n, sizeof(double));
+    double *yDev = (double*)calloc(n, sizeof(double));
 
-//     double xDevSqrSum = 0;
-//     double yDevSqrSum = 0;
-//     double xyDevSum = 0;
+    double xDevSqrSum = 0;
+    double yDevSqrSum = 0;
+    double xyDevSum = 0;
 
-//     double coef = 0;
+    double coef = 0;
 
-//     for (size_t cnt_i = 0; cnt_i < n; cnt_i++) {
-//         xSum += x[cnt_i];
-//         ySum += y[cnt_i];
-//     }
+    for (size_t cnt_i = 0; cnt_i < n; cnt_i++) {
+        xSum += x[cnt_i];
+        ySum += y[cnt_i];
+    }
 
-//     xAvg = xSum / n;
-//     yAvg = ySum / n;
+    xAvg = xSum / n;
+    yAvg = ySum / n;
 
-//     // 편차 구하기
-//     for (size_t cnt_i = 0; cnt_i < n; cnt_i++) {
-//         xDev[cnt_i] = x[cnt_i] - xAvg;
-//         yDev[cnt_i] = y[cnt_i] - yAvg;
-//     }
+    // 편차 구하기
+    for (size_t cnt_i = 0; cnt_i < n; cnt_i++) {
+        xDev[cnt_i] = x[cnt_i] - xAvg;
+        yDev[cnt_i] = y[cnt_i] - yAvg;
+    }
 
-//     for (size_t cnt_i = 0; cnt_i < n; cnt_i++) {
-//         xDevSqrSum += (xDev[cnt_i] * xDev[cnt_i]);
-//         yDevSqrSum += (yDev[cnt_i] * yDev[cnt_i]);
-//         xyDevSum += (xDev[cnt_i] * yDev[cnt_i]);
-//     }
+    for (size_t cnt_i = 0; cnt_i < n; cnt_i++) {
+        xDevSqrSum += (xDev[cnt_i] * xDev[cnt_i]);
+        yDevSqrSum += (yDev[cnt_i] * yDev[cnt_i]);
+        xyDevSum += (xDev[cnt_i] * yDev[cnt_i]);
+    }
     
-//     printf("xyDevSum = %lf, xDevSqrSum = %lf, yDevSqrSum = %lf\n", xyDevSum, xDevSqrSum, yDevSqrSum);    
+    printf("xyDevSum = %lf, xDevSqrSum = %lf, yDevSqrSum = %lf\n", xyDevSum, xDevSqrSum, yDevSqrSum);    
 
-//     if (xyDevSum == 0) {
-//         coef = 0;
-//     }
-//     else {
-//         coef = fabs(xyDevSum / sqrt(xDevSqrSum * yDevSqrSum));    
-//     }
+    if (xyDevSum == 0) {
+        coef = 0;
+    }
+    else {
+        coef = fabs(xyDevSum / sqrt(xDevSqrSum * yDevSqrSum));    
+    }
 
-//     // coef = fabs(xyDevSum / sqrt(xDevSqrSum * yDevSqrSum));    
-//     // printf("coef = %lf\n", coef);
-//     // printf("\n");
+    free(xDev);
+    free(yDev);
 
-//     // if (print == 1) {
-//     //     printf("coef = %lf\n", coef);
-//     //     printf("\n");
-//     // }
-    
-
-//     free(xDev);
-//     free(yDev);
-
-//     return coef;
-// }
-
+    return coef;
+}
+*/

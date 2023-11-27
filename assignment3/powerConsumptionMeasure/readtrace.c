@@ -19,25 +19,25 @@ int main() {
         fprintf(stderr, "File Open Error\n");
     }
 
-// file introduce
-char* buf = (char*)malloc(sizeof(char) * 20);
-fread(buf, sizeof(char), 20, fp_trace);
-printf("%s\n", buf);
+    // file introduce
+    char* buf = (char*)malloc(sizeof(char) * 20);
+    fread(buf, sizeof(char), 20, fp_trace);
+    printf("%s\n", buf);
 
-// read trace number
-int traceNum = 0;
-fread(&traceNum, sizeof(int), 1, fp_trace);
-printf("traceNum = %d\n", traceNum);    // 5000
+    // read trace number
+    int traceNum = 0;
+    fread(&traceNum, sizeof(int), 1, fp_trace);
+    printf("traceNum = %d\n", traceNum);    // 5000
 
-// read point number
-int pointNum = 0;
-fread(&pointNum, sizeof(int), 1, fp_trace);
-printf("pointNum = %d\n", pointNum);    // 4984
+    // read point number
+    int pointNum = 0;
+    fread(&pointNum, sizeof(int), 1, fp_trace);
+    printf("pointNum = %d\n", pointNum);    // 4984
 
-// "END!"
-char* buf2 = (char*)malloc(sizeof(char) * 4);
-fread(buf2, sizeof(char), 4, fp_trace);
-printf("%s\n", buf2);
+    // "END!"
+    char* buf2 = (char*)malloc(sizeof(char) * 4);
+    fread(buf2, sizeof(char), 4, fp_trace);
+    printf("%s\n", buf2);
 
     float** buf3 = (float**)malloc(sizeof(float*) * traceNum);
     for (size_t cnt_i = 0; cnt_i < traceNum; cnt_i++) {
