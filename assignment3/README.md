@@ -1,4 +1,4 @@
-# Assignment 2: CPA with real data
+# Assignment 3: CPA with real data
 
 ## Correlation Power Analysis (CPA) Attack on AES-128 S-Box
 
