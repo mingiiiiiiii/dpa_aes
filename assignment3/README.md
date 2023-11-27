@@ -58,8 +58,8 @@ The "powerConsumption.trace" file is a binary file and comprises the following c
    ```
 
 3. Choose attack mode:
-   test1() is designed for attacking all points.
-   test2() is designed for attacking selected points. You can customize the points by modifying the StartPoint and EndPoint values within the code.
+   `test1()` is designed for attacking all points.
+   `test2()` is designed for attacking selected points. You can customize the points by modifying the `StartPoint` and `EndPoint` values within the code.
 
 3. Run the CPA attack:
    ```shell
