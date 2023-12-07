@@ -3,6 +3,8 @@
 #include <stdio.h>
 #include <stdint.h>
 
+extern const uint8_t Sbox[256];
+
 void addRoundKey(uint8_t state[], uint8_t roundkey[]);
 
 void subBytes(uint8_t state[]);

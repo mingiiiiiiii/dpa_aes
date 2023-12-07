@@ -4,7 +4,7 @@
 #include <string.h>
 
 #define TraceNum    1000
-#define PointNum    64
+#define PointNum    16
 #define KeyCandidateNum 256
 #define PlainFileName   "plaintext.txt"
 #define TraceFileName   "simulatedPowerConsumption.txt"
@@ -34,7 +34,9 @@ int main() {
     for (size_t trace_cnt = 0; trace_cnt < TraceNum; trace_cnt++) {
         for (size_t point_cnt = 0; point_cnt < PointNum; point_cnt++) {
             fscanf(fp_trace, "%d", &ptHammingWeigTable[trace_cnt][point_cnt]);
+            // printf("%d ", ptHammingWeigTable[trace_cnt][point_cnt]);
         }
+        printf("\n");
     }
 
     //todo make plaintext table
@@ -93,9 +95,9 @@ int main() {
                 difference[point_cnt] = getAbsoluteValue(msbOneAvg[point_cnt] - msbZeroAvg[point_cnt]);
             }
             
-            mergeSortArrayVer(difference, 0, 64 - 1);  // sort difference 
+            mergeSortArrayVer(difference, 0, PointNum - 1);  // sort difference 
             maxDifferenceCandid[guessKey].originalIndex = guessKey; // struct --> [value, index(guessKey)]
-            maxDifferenceCandid[guessKey].value = difference[64 - 1];  // 최댓값 대입 (포인트 64개 중 최댓값을 현재 loop의 guesskey의 대푯값으로 생각하기)
+            maxDifferenceCandid[guessKey].value = difference[PointNum - 1];  // 최댓값 대입 (포인트 64개 중 최댓값을 현재 loop의 guesskey의 대푯값으로 생각하기)
         }
 
         //todo 256개의 difference 최댓값으로 guesskey 확정하기

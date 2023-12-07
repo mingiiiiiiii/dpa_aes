@@ -93,9 +93,9 @@ int main() {
                 difference[point_cnt] = getAbsoluteValue(msbOneAvg[point_cnt] - msbZeroAvg[point_cnt]);
             }
             
-            mergeSortArrayVer(difference, 0, 64 - 1);  // sort difference 
+            mergeSortArrayVer(difference, 0, PointNum - 1);  // sort difference 
             maxDifferenceCandid[guessKey].originalIndex = guessKey; // struct --> [value, index(guessKey)]
-            maxDifferenceCandid[guessKey].value = difference[64 - 1];  // 최댓값 대입 (포인트 64개 중 최댓값을 현재 loop의 guesskey의 대푯값으로 생각하기)
+            maxDifferenceCandid[guessKey].value = difference[PointNum - 1];  // 최댓값 대입 (포인트 64개 중 최댓값을 현재 loop의 guesskey의 대푯값으로 생각하기)
         }
 
         //todo 256개의 difference 최댓값으로 guesskey 확정하기
