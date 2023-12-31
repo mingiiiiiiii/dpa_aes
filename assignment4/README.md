@@ -1,4 +1,4 @@
-# Assignment 4: Countermeasure of SCA : Hiding
+# Assignment 4: Countermeasure of SCA -> Hiding
 
 ## AES-128 Hiding using shuffling techniques and DPA (Differential Power Analysis) attack 
 
