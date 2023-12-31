@@ -2,7 +2,7 @@
 
 ## AES-128 Hiding using shuffling techniques and DPA (Differential Power Analysis) attack 
 
-This guide explains how to counteract side-channel analysis on the AES-128 S-Box using a hiding technique and practically execute a Differential Power Analysis (DPA) attack. First, a random operation order is assigned to AES s-box operations through Fisher-Yates shuffling. This gives it randomness, making it guess the operation with a probability of 1/16. In theory, this shuffling increases the number of waveforms required for side-channel analysis by 16^2. This guide involves analyzing AES implemented with stealth via the DPA method, which consists of two main steps: implementing AES with shuffling and performing DPA. The DPA attack is performed similarly to [Assignment 1].
+This guide explains how to counteract side-channel analysis on the AES-128 S-Box using a hiding technique and practically execute a Differential Power Analysis (DPA) attack. First, a random operation order is assigned to AES s-box operations through **Fisher-Yates shuffling**. This gives it randomness, making it guess the operation with a probability of 1/16. In theory, this shuffling increases the number of waveforms required for side-channel analysis by 16^2. This guide involves analyzing AES implemented with stealth via the DPA method, which consists of two main steps: implementing AES with shuffling and performing DPA. The DPA attack is performed similarly to [Assignment 1].
 
 ### Prerequisites
 
